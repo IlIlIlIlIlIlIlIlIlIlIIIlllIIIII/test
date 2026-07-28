@@ -1,6 +1,6 @@
--- FULL MERGED SCRIPT WITH SERVER HOP + PERMANENT GUI LOOP + YOUR queue_on_teleport METHOD
+-- FINAL FULL SCRIPT (WITH FIXED TELEPORT + FIXED GUI SPAM + SERVER HOP + YOUR METHOD)
 
-local SCRIPT_URL = "https://raw.githubusercontent.com/IlIlIlIlIlIlIlIlIlIlIIIlllIIIII/test/refs/heads/main/test"
+local RAW = "https://raw.githubusercontent.com/IlIlIlIlIlIlIlIlIlIlIIIlllIIIII/test/refs/heads/main/test"
 
 -----------------------------------------------------
 -- WAIT FOR FULL GAME LOAD
@@ -8,6 +8,7 @@ local SCRIPT_URL = "https://raw.githubusercontent.com/IlIlIlIlIlIlIlIlIlIlIIIlll
 repeat task.wait() until game:IsLoaded()
 
 local Players = game:GetService("Players")
+local LocalPlayer = Players.LocalPlayer
 local TeleportService = game:GetService("TeleportService")
 local UserInputService = game:GetService("UserInputService")
 local RunService = game:GetService("RunService")
@@ -17,7 +18,6 @@ local HttpService = game:GetService("HttpService")
 -----------------------------------------------------
 -- WAIT FOR PLAYER
 -----------------------------------------------------
-local LocalPlayer = Players.LocalPlayer
 while not LocalPlayer do
     Players.PlayerAdded:Wait()
     LocalPlayer = Players.LocalPlayer
@@ -35,22 +35,17 @@ end
 local Character = waitForChar()
 
 -----------------------------------------------------
--- WAIT FOR PLAYERGUI TO FULLY LOAD
+-- WAIT FOR GUI
 -----------------------------------------------------
 repeat task.wait() until LocalPlayer:FindFirstChild("PlayerGui")
-repeat task.wait() until #LocalPlayer.PlayerGui:GetChildren() > 0
-
-local gui = LocalPlayer.PlayerGui
 
 -----------------------------------------------------
--- YOUR FULL SYSTEM (StartSystem)
+-- YOUR FULL SYSTEM
 -----------------------------------------------------
 local function StartSystem()
     local Humanoid = Character:WaitForChild("Humanoid")
 
-    -----------------------------------------------------
     -- Animations
-    -----------------------------------------------------
     local animGojo = Instance.new("Animation")
     animGojo.AnimationId = ReplicatedStorage.Emote.GojoWalk.R15.Idle.AnimationId
     local trackGojo = Humanoid:LoadAnimation(animGojo)
@@ -68,9 +63,7 @@ local function StartSystem()
     local playingGojo = false
     local playingGeto = false
 
-    -----------------------------------------------------
-    -- Keybinds (1 / 2)
-    -----------------------------------------------------
+    -- Keybinds 1/2
     UserInputService.InputBegan:Connect(function(input, gp)
         if gp then return end
 
@@ -91,9 +84,7 @@ local function StartSystem()
         end
     end)
 
-    -----------------------------------------------------
     -- Movement Logic
-    -----------------------------------------------------
     RunService.RenderStepped:Connect(function()
         local moving = Humanoid.MoveDirection.Magnitude > 0.1
 
@@ -129,22 +120,18 @@ local function StartSystem()
         end
     end)
 
-    -----------------------------------------------------
-    -- HipHeight
-    -----------------------------------------------------
     Humanoid.HipHeight = 2.95
 end
 
 -----------------------------------------------------
--- PERMANENT GUI LOOP (NEVER DIES)
+-- PERMANENT GUI SPAM (NEVER DIES, ALWAYS RUNS)
 -----------------------------------------------------
 task.spawn(function()
     while true do
         task.wait()
 
         pcall(function()
-            local player = Players.LocalPlayer
-            local gui = player:FindFirstChild("PlayerGui")
+            local gui = LocalPlayer:FindFirstChild("PlayerGui")
             if not gui then return end
 
             local stats = gui:FindFirstChild("StatsScreenGui")
@@ -186,7 +173,7 @@ task.spawn(function()
 end)
 
 -----------------------------------------------------
--- REJOIN ON Z
+-- Z = REJOIN
 -----------------------------------------------------
 UserInputService.InputBegan:Connect(function(input, gp)
     if gp then return end
@@ -196,7 +183,7 @@ UserInputService.InputBegan:Connect(function(input, gp)
 end)
 
 -----------------------------------------------------
--- SERVER HOP ON X (NEW SERVER)
+-- X = SERVER HOP (NEW SERVER)
 -----------------------------------------------------
 UserInputService.InputBegan:Connect(function(input, gp)
     if gp then return end
@@ -223,9 +210,9 @@ loadstring(game:HttpGet("https://raw.githubusercontent.com/IlIlIlIlIlIlIlIlIlIlI
 end)
 
 -----------------------------------------------------
--- RUN YOUR GITHUB SCRIPT NOW
+-- RUN RAW FILE NOW
 -----------------------------------------------------
-loadstring(game:HttpGet(SCRIPT_URL))()
+loadstring(game:HttpGet(RAW))()
 
 -----------------------------------------------------
 -- RUN LOCAL SYSTEM NOW
