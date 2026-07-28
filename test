@@ -21,84 +21,14 @@ local Character = waitChar()
 local Humanoid = Character:WaitForChild("Humanoid")
 
 ----------------------------------------------------------------
--- ANIMATION SYSTEM (LIGHTWEIGHT)
+-- REMOVE WALKING ANIMATION SYSTEM
+-- (No Gojo / No Geto / No Keybinds / No RenderStepped)
 ----------------------------------------------------------------
-local animGojo = Instance.new("Animation")
-animGojo.AnimationId = ReplicatedStorage.Emote.GojoWalk.R15.Idle.AnimationId
-local trackGojo = Humanoid:LoadAnimation(animGojo)
-trackGojo.Looped = true
-trackGojo.Priority = Enum.AnimationPriority.Action
 
-local animGeto = Instance.new("Animation")
-animGeto.AnimationId = ReplicatedStorage.Emote.GetoWalk.R15.Idle.AnimationId
-local trackGeto = Humanoid:LoadAnimation(animGeto)
-trackGeto.Looped = true
-trackGeto.Priority = Enum.AnimationPriority.Action
-
-local toggleGojo = false
-local toggleGeto = false
-local playingGojo = false
-local playingGeto = false
-
-UserInputService.InputBegan:Connect(function(input, gp)
-    if gp then return end
-
-    if input.KeyCode == Enum.KeyCode.One then
-        toggleGojo = not toggleGojo
-        if not toggleGojo and playingGojo then
-            trackGojo:Stop()
-            playingGojo = false
-        end
-    end
-
-    if input.KeyCode == Enum.KeyCode.Two then
-        toggleGeto = not toggleGeto
-        if not toggleGeto and playingGeto then
-            trackGeto:Stop()
-            playingGeto = false
-        end
-    end
-end)
-
-RunService.Heartbeat:Connect(function()
-    local moving = Humanoid.MoveDirection.Magnitude > 0.1
-
-    if toggleGojo and moving then
-        if not playingGojo then
-            playingGojo = true
-            trackGojo:Play()
-        end
-        if playingGeto then
-            trackGeto:Stop()
-            playingGeto = false
-        end
-
-    elseif toggleGeto and moving then
-        if not playingGeto then
-            playingGeto = true
-            trackGeto:Play()
-        end
-        if playingGojo then
-            trackGojo:Stop()
-            playingGojo = false
-        end
-
-    else
-        if playingGojo then
-            trackGojo:Stop()
-            playingGojo = false
-        end
-        if playingGeto then
-            trackGeto:Stop()
-            playingGeto = false
-        end
-    end
-end)
-
-Humanoid.HipHeight = 2.75
+Humanoid.HipHeight = 2.95
 
 ----------------------------------------------------------------
--- CACHE GUI REFERENCES (NO MORE FINDFIRSTCHILD SPAM)
+-- CACHE GUI REFERENCES (FAST)
 ----------------------------------------------------------------
 local gui = LocalPlayer:WaitForChild("PlayerGui", 5)
 local statsGui = gui:WaitForChild("StatsScreenGui", 5)
@@ -141,7 +71,7 @@ local function updateStats()
 end
 
 ----------------------------------------------------------------
--- M KEY = TOGGLE GUI LOOP (NO LAG)
+-- M KEY = TOGGLE GUI LOOP
 ----------------------------------------------------------------
 local guiLoop = false
 
