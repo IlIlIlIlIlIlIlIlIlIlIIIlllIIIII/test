@@ -95,7 +95,7 @@ RunService.Heartbeat:Connect(function()
     end
 end)
 
-Humanoid.HipHeight = 2.95
+Humanoid.HipHeight = 2.75
 
 ----------------------------------------------------------------
 -- CACHE GUI REFERENCES (NO MORE FINDFIRSTCHILD SPAM)
