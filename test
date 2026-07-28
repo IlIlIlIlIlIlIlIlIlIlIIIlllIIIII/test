@@ -84,7 +84,7 @@ UserInputService.InputBegan:Connect(function(input, gp)
             task.spawn(function()
                 while guiLoop do
                     updateStats()
-                    task.wait(0.5)
+                    task.wait(1.5)
                 end
             end)
         end
