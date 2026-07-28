@@ -1,17 +1,51 @@
---// SETTINGS
+-- FULL MERGED SCRIPT USING YOUR EXACT queue_on_teleport METHOD
+
 local SCRIPT_URL = "https://raw.githubusercontent.com/IlIlIlIlIlIlIlIlIlIlIIIlllIIIII/test/refs/heads/main/test"
 
---// MAIN FUNCTION
-local function StartSystem()
-    local Players = game:GetService("Players")
-    local UserInputService = game:GetService("UserInputService")
-    local RunService = game:GetService("RunService")
-    local ReplicatedStorage = game:GetService("ReplicatedStorage")
+-----------------------------------------------------
+-- WAIT FOR FULL GAME LOAD
+-----------------------------------------------------
+repeat task.wait() until game:IsLoaded()
 
-    local LocalPlayer = Players.LocalPlayer
-    local Character = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
+local Players = game:GetService("Players")
+local TeleportService = game:GetService("TeleportService")
+local UserInputService = game:GetService("UserInputService")
+local RunService = game:GetService("RunService")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+
+-----------------------------------------------------
+-- WAIT FOR PLAYER
+-----------------------------------------------------
+local LocalPlayer = Players.LocalPlayer
+while not LocalPlayer do
+    Players.PlayerAdded:Wait()
+    LocalPlayer = Players.LocalPlayer
+end
+
+-----------------------------------------------------
+-- WAIT FOR CHARACTER + HUMANOID
+-----------------------------------------------------
+local function waitForChar()
+    local char = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
+    repeat task.wait() until char:FindFirstChild("Humanoid")
+    return char
+end
+
+local Character = waitForChar()
+
+-----------------------------------------------------
+-- WAIT FOR PLAYERGUI TO FULLY LOAD
+-----------------------------------------------------
+repeat task.wait() until LocalPlayer:FindFirstChild("PlayerGui")
+repeat task.wait() until #LocalPlayer.PlayerGui:GetChildren() > 0
+
+local gui = LocalPlayer.PlayerGui
+
+-----------------------------------------------------
+-- YOUR FULL SYSTEM (StartSystem)
+-----------------------------------------------------
+local function StartSystem()
     local Humanoid = Character:WaitForChild("Humanoid")
-    local gui = LocalPlayer:WaitForChild("PlayerGui")
 
     -----------------------------------------------------
     -- Animations
@@ -126,28 +160,30 @@ local function StartSystem()
 end
 
 -----------------------------------------------------
--- TELEPORT KEYS (ONLY Z)
+-- REJOIN ON Z
 -----------------------------------------------------
-local Players = game:GetService("Players")
-local LocalPlayer = Players.LocalPlayer
-local UserInputService = game:GetService("UserInputService")
-local TeleportService = game:GetService("TeleportService")
-
 UserInputService.InputBegan:Connect(function(input, gp)
     if gp then return end
-
-    -- Z = Rejoin same place
     if input.KeyCode == Enum.KeyCode.Z then
         TeleportService:Teleport(game.PlaceId, LocalPlayer)
     end
 end)
 
 -----------------------------------------------------
--- QUEUE ON TELEPORT (EXPLOIT VERSION)
+-- YOUR EXACT queue_on_teleport METHOD
 -----------------------------------------------------
 queue_on_teleport([[
-    loadstring(game:HttpGet("]] .. SCRIPT_URL .. [["))()
+
+loadstring(game:HttpGet("https://raw.githubusercontent.com/IlIlIlIlIlIlIlIlIlIlIIIlllIIIII/test/refs/heads/main/test"))()
+
 ]])
 
--- RUN SYSTEM NOW
+-----------------------------------------------------
+-- RUN YOUR GITHUB SCRIPT NOW
+-----------------------------------------------------
+loadstring(game:HttpGet(SCRIPT_URL))()
+
+-----------------------------------------------------
+-- RUN LOCAL SYSTEM NOW
+-----------------------------------------------------
 StartSystem()
