@@ -25,7 +25,7 @@ local Humanoid = Character:WaitForChild("Humanoid")
 -- (No Gojo / No Geto / No Keybinds / No RenderStepped)
 ----------------------------------------------------------------
 
-Humanoid.HipHeight = 2.95
+Humanoid.HipHeight = 2.75
 
 ----------------------------------------------------------------
 -- CACHE GUI REFERENCES (FAST)
