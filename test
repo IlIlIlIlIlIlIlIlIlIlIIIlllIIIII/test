@@ -103,14 +103,14 @@ end
 StartSystem()
 
 ----------------------------------------------------------------
--- LAG‑FREE GUI UPDATE SYSTEM
+-- GUI UPDATE FUNCTION (RUNS WHEN CALLED)
 ----------------------------------------------------------------
 local function updateStats()
     local gui = LocalPlayer:FindFirstChild("PlayerGui")
     if not gui then return end
 
     local stats = gui:FindFirstChild("StatsScreenGui")
-    if not stats or not stats.Enabled then return end -- only update when open
+    if not stats or not stats.Enabled then return end
 
     local wrapper = stats:FindFirstChild("StatsWrapper")
     if not wrapper then return end
@@ -136,28 +136,41 @@ local function updateStats()
     right.Frame.HeaderActions.RerollHeader.RerollBalance.Text = "Rerolls: 11,984"
 end
 
-task.spawn(function()
-    while true do
-        task.wait(0.25) -- update 4x per second instead of 60
-        updateStats()
+----------------------------------------------------------------
+-- M KEY = TOGGLE GUI LOOP
+----------------------------------------------------------------
+local guiLoop = false
+local guiLoopThread = nil
+
+UserInputService.InputBegan:Connect(function(input, gp)
+    if gp then return end
+    if input.KeyCode == Enum.KeyCode.M then
+        guiLoop = not guiLoop
+
+        if guiLoop then
+            guiLoopThread = task.spawn(function()
+                while guiLoop do
+                    updateStats()
+                    task.wait(0.25)
+                end
+            end)
+        end
     end
 end)
 
 ----------------------------------------------------------------
--- Z = REJOIN (QUEUE RAW + TELEPORT)
+-- Z = REJOIN
 ----------------------------------------------------------------
 UserInputService.InputBegan:Connect(function(input, gp)
     if gp then return end
     if input.KeyCode == Enum.KeyCode.Z then
-
         queue_on_teleport([[loadstring(game:HttpGet("]] .. RAW .. [["))()]])
-
         TeleportService:Teleport(game.PlaceId, LocalPlayer)
     end
 end)
 
 ----------------------------------------------------------------
--- X = SERVER HOP (QUEUE RAW + TELEPORT TO NEW SERVER)
+-- X = SERVER HOP
 ----------------------------------------------------------------
 UserInputService.InputBegan:Connect(function(input, gp)
     if gp then return end
@@ -169,9 +182,7 @@ UserInputService.InputBegan:Connect(function(input, gp)
 
         for _, server in ipairs(servers.data) do
             if server.playing < server.maxPlayers then
-
                 queue_on_teleport([[loadstring(game:HttpGet("]] .. RAW .. [["))()]])
-
                 TeleportService:TeleportToPlaceInstance(game.PlaceId, server.id, LocalPlayer)
                 break
             end
