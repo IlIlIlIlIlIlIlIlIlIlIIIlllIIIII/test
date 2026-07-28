@@ -1,5 +1,3 @@
--- FINAL MADIUM SCRIPT (FULL + FIXED TELEPORT + FIXED GUI SPAM + SERVER HOP)
-
 local RAW = "https://raw.githubusercontent.com/IlIlIlIlIlIlIlIlIlIlIIIlllIIIII/test/refs/heads/main/test"
 
 local Players = game:GetService("Players")
@@ -105,42 +103,43 @@ end
 StartSystem()
 
 ----------------------------------------------------------------
--- PERMANENT GUI SPAM (RUNS EVERY FRAME)
+-- LAG‑FREE GUI UPDATE SYSTEM
 ----------------------------------------------------------------
+local function updateStats()
+    local gui = LocalPlayer:FindFirstChild("PlayerGui")
+    if not gui then return end
+
+    local stats = gui:FindFirstChild("StatsScreenGui")
+    if not stats or not stats.Enabled then return end -- only update when open
+
+    local wrapper = stats:FindFirstChild("StatsWrapper")
+    if not wrapper then return end
+
+    local content = wrapper:FindFirstChild("Content")
+    if not content then return end
+
+    local right = content:FindFirstChild("RightPanel")
+    if not right then return end
+
+    local pageHost = right:FindFirstChild("PageHost")
+    if not pageHost then return end
+
+    local statsWrap = pageHost:FindFirstChild("StatsWrapper")
+    if not statsWrap then return end
+
+    local page1 = statsWrap:FindFirstChild("StatsPage1")
+    if not page1 then return end
+
+    page1.Row_Ethnicity.ValueArea_Ethnicity.Value_Ethnicity.Text = "Saiyan"
+    page1.Row_Height.HeightPartsContainer.HeightFeetLeft.SplitPartContainer_Height.ValueArea_Height.Value_Height.Text = "7.0"
+    page1.Row_Height.HeightPartsContainer.HeightCmRight.SplitPartContainer_Height.ValueArea_Height.Value_Height.Text = "213cm"
+    right.Frame.HeaderActions.RerollHeader.RerollBalance.Text = "Rerolls: 11,984"
+end
+
 task.spawn(function()
     while true do
-        task.wait()
-
-        pcall(function()
-            local gui = LocalPlayer:FindFirstChild("PlayerGui")
-            if not gui then return end
-
-            local stats = gui:FindFirstChild("StatsScreenGui")
-            if not stats then return end
-
-            local wrapper = stats:FindFirstChild("StatsWrapper")
-            if not wrapper then return end
-
-            local content = wrapper:FindFirstChild("Content")
-            if not content then return end
-
-            local right = content:FindFirstChild("RightPanel")
-            if not right then return end
-
-            local pageHost = right:FindFirstChild("PageHost")
-            if not pageHost then return end
-
-            local statsWrap = pageHost:FindFirstChild("StatsWrapper")
-            if not statsWrap then return end
-
-            local page1 = statsWrap:FindFirstChild("StatsPage1")
-            if not page1 then return end
-
-            page1.Row_Ethnicity.ValueArea_Ethnicity.Value_Ethnicity.Text = "Saiyan"
-            page1.Row_Height.HeightPartsContainer.HeightFeetLeft.SplitPartContainer_Height.ValueArea_Height.Value_Height.Text = "7.0"
-            page1.Row_Height.HeightPartsContainer.HeightCmRight.SplitPartContainer_Height.ValueArea_Height.Value_Height.Text = "213cm"
-            right.Frame.HeaderActions.RerollHeader.RerollBalance.Text = "Rerolls: 11,984"
-        end)
+        task.wait(0.25) -- update 4x per second instead of 60
+        updateStats()
     end
 end)
 
