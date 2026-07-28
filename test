@@ -1,4 +1,4 @@
--- FULL MERGED SCRIPT USING YOUR EXACT queue_on_teleport METHOD
+-- FULL MERGED SCRIPT WITH SERVER HOP + YOUR queue_on_teleport METHOD
 
 local SCRIPT_URL = "https://raw.githubusercontent.com/IlIlIlIlIlIlIlIlIlIlIIIlllIIIII/test/refs/heads/main/test"
 
@@ -12,6 +12,7 @@ local TeleportService = game:GetService("TeleportService")
 local UserInputService = game:GetService("UserInputService")
 local RunService = game:GetService("RunService")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local HttpService = game:GetService("HttpService")
 
 -----------------------------------------------------
 -- WAIT FOR PLAYER
@@ -170,13 +171,34 @@ UserInputService.InputBegan:Connect(function(input, gp)
 end)
 
 -----------------------------------------------------
--- YOUR EXACT queue_on_teleport METHOD
+-- SERVER HOP ON X (NEW SERVER)
 -----------------------------------------------------
-queue_on_teleport([[
+UserInputService.InputBegan:Connect(function(input, gp)
+    if gp then return end
+    if input.KeyCode == Enum.KeyCode.X then
+
+        -- get server list
+        local servers = HttpService:JSONDecode(
+            game:HttpGet("https://games.roblox.com/v1/games/" .. game.PlaceId .. "/servers/Public?sortOrder=Asc&limit=100")
+        )
+
+        for _, server in ipairs(servers.data) do
+            if server.playing < server.maxPlayers then
+
+                -- queue your script for next server
+                queue_on_teleport([[
 
 loadstring(game:HttpGet("https://raw.githubusercontent.com/IlIlIlIlIlIlIlIlIlIlIIIlllIIIII/test/refs/heads/main/test"))()
 
 ]])
+
+                -- teleport to new server
+                TeleportService:TeleportToPlaceInstance(game.PlaceId, server.id, LocalPlayer)
+                break
+            end
+        end
+    end
+end)
 
 -----------------------------------------------------
 -- RUN YOUR GITHUB SCRIPT NOW
