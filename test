@@ -18,116 +18,120 @@ local function waitChar()
 end
 
 local Character = waitChar()
+local Humanoid = Character:WaitForChild("Humanoid")
 
 ----------------------------------------------------------------
--- START SYSTEM (ANIMATIONS + MOVEMENT)
+-- ANIMATION SYSTEM (LIGHTWEIGHT)
 ----------------------------------------------------------------
-local function StartSystem()
-    local Humanoid = Character:WaitForChild("Humanoid")
+local animGojo = Instance.new("Animation")
+animGojo.AnimationId = ReplicatedStorage.Emote.GojoWalk.R15.Idle.AnimationId
+local trackGojo = Humanoid:LoadAnimation(animGojo)
+trackGojo.Looped = true
+trackGojo.Priority = Enum.AnimationPriority.Action
 
-    local animGojo = Instance.new("Animation")
-    animGojo.AnimationId = ReplicatedStorage.Emote.GojoWalk.R15.Idle.AnimationId
-    local trackGojo = Humanoid:LoadAnimation(animGojo)
-    trackGojo.Looped = true
-    trackGojo.Priority = Enum.AnimationPriority.Action
+local animGeto = Instance.new("Animation")
+animGeto.AnimationId = ReplicatedStorage.Emote.GetoWalk.R15.Idle.AnimationId
+local trackGeto = Humanoid:LoadAnimation(animGeto)
+trackGeto.Looped = true
+trackGeto.Priority = Enum.AnimationPriority.Action
 
-    local animGeto = Instance.new("Animation")
-    animGeto.AnimationId = ReplicatedStorage.Emote.GetoWalk.R15.Idle.AnimationId
-    local trackGeto = Humanoid:LoadAnimation(animGeto)
-    trackGeto.Looped = true
-    trackGeto.Priority = Enum.AnimationPriority.Action
+local toggleGojo = false
+local toggleGeto = false
+local playingGojo = false
+local playingGeto = false
 
-    local toggleGojo = false
-    local toggleGeto = false
-    local playingGojo = false
-    local playingGeto = false
+UserInputService.InputBegan:Connect(function(input, gp)
+    if gp then return end
 
-    UserInputService.InputBegan:Connect(function(input, gp)
-        if gp then return end
+    if input.KeyCode == Enum.KeyCode.One then
+        toggleGojo = not toggleGojo
+        if not toggleGojo and playingGojo then
+            trackGojo:Stop()
+            playingGojo = false
+        end
+    end
 
-        if input.KeyCode == Enum.KeyCode.One then
-            toggleGojo = not toggleGojo
-            if not toggleGojo and playingGojo then
-                trackGojo:Stop()
-                playingGojo = false
-            end
+    if input.KeyCode == Enum.KeyCode.Two then
+        toggleGeto = not toggleGeto
+        if not toggleGeto and playingGeto then
+            trackGeto:Stop()
+            playingGeto = false
+        end
+    end
+end)
+
+RunService.Heartbeat:Connect(function()
+    local moving = Humanoid.MoveDirection.Magnitude > 0.1
+
+    if toggleGojo and moving then
+        if not playingGojo then
+            playingGojo = true
+            trackGojo:Play()
+        end
+        if playingGeto then
+            trackGeto:Stop()
+            playingGeto = false
         end
 
-        if input.KeyCode == Enum.KeyCode.Two then
-            toggleGeto = not toggleGeto
-            if not toggleGeto and playingGeto then
-                trackGeto:Stop()
-                playingGeto = false
-            end
+    elseif toggleGeto and moving then
+        if not playingGeto then
+            playingGeto = true
+            trackGeto:Play()
         end
-    end)
-
-    RunService.RenderStepped:Connect(function()
-        local moving = Humanoid.MoveDirection.Magnitude > 0.1
-
-        if toggleGojo and moving then
-            if not playingGojo then
-                playingGojo = true
-                trackGojo:Play()
-            end
-            if playingGeto then
-                trackGeto:Stop()
-                playingGeto = false
-            end
-
-        elseif toggleGeto and moving then
-            if not playingGeto then
-                playingGeto = true
-                trackGeto:Play()
-            end
-            if playingGojo then
-                trackGojo:Stop()
-                playingGojo = false
-            end
-
-        else
-            if playingGojo then
-                trackGojo:Stop()
-                playingGojo = false
-            end
-            if playingGeto then
-                trackGeto:Stop()
-                playingGeto = false
-            end
+        if playingGojo then
+            trackGojo:Stop()
+            playingGojo = false
         end
-    end)
 
-    Humanoid.HipHeight = 2.95
-end
+    else
+        if playingGojo then
+            trackGojo:Stop()
+            playingGojo = false
+        end
+        if playingGeto then
+            trackGeto:Stop()
+            playingGeto = false
+        end
+    end
+end)
 
-StartSystem()
+Humanoid.HipHeight = 2.95
 
 ----------------------------------------------------------------
--- GUI UPDATE FUNCTION (RUNS WHEN CALLED)
+-- CACHE GUI REFERENCES (NO MORE FINDFIRSTCHILD SPAM)
 ----------------------------------------------------------------
-local function updateStats()
-    local gui = LocalPlayer:FindFirstChild("PlayerGui")
-    if not gui then return end
+local gui = LocalPlayer:WaitForChild("PlayerGui", 5)
+local statsGui = gui:WaitForChild("StatsScreenGui", 5)
 
-    local stats = gui:FindFirstChild("StatsScreenGui")
-    if not stats or not stats.Enabled then return end
+local function getStats()
+    if not statsGui.Enabled then return nil end
 
-    local wrapper = stats:FindFirstChild("StatsWrapper")
-    if not wrapper then return end
+    local wrapper = statsGui:FindFirstChild("StatsWrapper")
+    if not wrapper then return nil end
 
     local content = wrapper:FindFirstChild("Content")
-    if not content then return end
+    if not content then return nil end
 
     local right = content:FindFirstChild("RightPanel")
-    if not right then return end
+    if not right then return nil end
 
     local pageHost = right:FindFirstChild("PageHost")
-    if not pageHost then return end
+    if not pageHost then return nil end
 
     local statsWrap = pageHost:FindFirstChild("StatsWrapper")
-    if not statsWrap then return end
+    if not statsWrap then return nil end
 
     local page1 = statsWrap:FindFirstChild("StatsPage1")
+    if not page1 then return nil end
+
+    return page1, right
+end
+
+----------------------------------------------------------------
+-- GUI UPDATE FUNCTION
+----------------------------------------------------------------
+local function updateStats()
+    local page1, right = getStats()
     if not page1 then return end
 
     page1.Row_Ethnicity.ValueArea_Ethnicity.Value_Ethnicity.Text = "Saiyan"
@@ -137,10 +141,9 @@ local function updateStats()
 end
 
 ----------------------------------------------------------------
--- M KEY = TOGGLE GUI LOOP
+-- M KEY = TOGGLE GUI LOOP (NO LAG)
 ----------------------------------------------------------------
 local guiLoop = false
-local guiLoopThread = nil
 
 UserInputService.InputBegan:Connect(function(input, gp)
     if gp then return end
@@ -148,10 +151,10 @@ UserInputService.InputBegan:Connect(function(input, gp)
         guiLoop = not guiLoop
 
         if guiLoop then
-            guiLoopThread = task.spawn(function()
+            task.spawn(function()
                 while guiLoop do
                     updateStats()
-                    task.wait(0.25)
+                    task.wait(0.5)
                 end
             end)
         end
