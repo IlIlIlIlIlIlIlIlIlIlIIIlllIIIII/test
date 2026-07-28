@@ -1,4 +1,4 @@
--- FULL MERGED SCRIPT WITH SERVER HOP + YOUR queue_on_teleport METHOD
+-- FULL MERGED SCRIPT WITH SERVER HOP + PERMANENT GUI LOOP + YOUR queue_on_teleport METHOD
 
 local SCRIPT_URL = "https://raw.githubusercontent.com/IlIlIlIlIlIlIlIlIlIlIIIlllIIIII/test/refs/heads/main/test"
 
@@ -133,32 +133,57 @@ local function StartSystem()
     -- HipHeight
     -----------------------------------------------------
     Humanoid.HipHeight = 2.95
-
-    -----------------------------------------------------
-    -- GUI SPAM LOOP
-    -----------------------------------------------------
-    task.spawn(function()
-        while true do
-            pcall(function()
-                gui.StatsScreenGui.StatsWrapper.Content.RightPanel.PageHost
-                    .StatsWrapper.StatsPage1.Row_Ethnicity.ValueArea_Ethnicity.Value_Ethnicity.Text = "Saiyan"
-
-                gui.StatsScreenGui.StatsWrapper.Content.RightPanel.PageHost
-                    .StatsWrapper.StatsPage1.Row_Height.HeightPartsContainer.HeightFeetLeft
-                    .SplitPartContainer_Height.ValueArea_Height.Value_Height.Text = "7.0"
-
-                gui.StatsScreenGui.StatsWrapper.Content.RightPanel.PageHost
-                    .StatsWrapper.StatsPage1.Row_Height.HeightPartsContainer.HeightCmRight
-                    .SplitPartContainer_Height.ValueArea_Height.Value_Height.Text = "213cm"
-
-                gui.StatsScreenGui.StatsWrapper.Content.RightPanel.Frame
-                    .HeaderActions.RerollHeader.RerollBalance.Text = "Rerolls: 11,984"
-            end)
-
-            task.wait()
-        end
-    end)
 end
+
+-----------------------------------------------------
+-- PERMANENT GUI LOOP (NEVER DIES)
+-----------------------------------------------------
+task.spawn(function()
+    while true do
+        task.wait()
+
+        pcall(function()
+            local player = Players.LocalPlayer
+            local gui = player:FindFirstChild("PlayerGui")
+            if not gui then return end
+
+            local stats = gui:FindFirstChild("StatsScreenGui")
+            if not stats then return end
+
+            local wrapper = stats:FindFirstChild("StatsWrapper")
+            if not wrapper then return end
+
+            local content = wrapper:FindFirstChild("Content")
+            if not content then return end
+
+            local right = content:FindFirstChild("RightPanel")
+            if not right then return end
+
+            local pageHost = right:FindFirstChild("PageHost")
+            if not pageHost then return end
+
+            local statsWrap = pageHost:FindFirstChild("StatsWrapper")
+            if not statsWrap then return end
+
+            local page1 = statsWrap:FindFirstChild("StatsPage1")
+            if not page1 then return end
+
+            -- Ethnicity
+            page1.Row_Ethnicity.ValueArea_Ethnicity.Value_Ethnicity.Text = "Saiyan"
+
+            -- Height Feet
+            page1.Row_Height.HeightPartsContainer.HeightFeetLeft
+                .SplitPartContainer_Height.ValueArea_Height.Value_Height.Text = "7.0"
+
+            -- Height CM
+            page1.Row_Height.HeightPartsContainer.HeightCmRight
+                .SplitPartContainer_Height.ValueArea_Height.Value_Height.Text = "213cm"
+
+            -- Rerolls
+            right.Frame.HeaderActions.RerollHeader.RerollBalance.Text = "Rerolls: 11,984"
+        end)
+    end
+end)
 
 -----------------------------------------------------
 -- REJOIN ON Z
@@ -177,7 +202,6 @@ UserInputService.InputBegan:Connect(function(input, gp)
     if gp then return end
     if input.KeyCode == Enum.KeyCode.X then
 
-        -- get server list
         local servers = HttpService:JSONDecode(
             game:HttpGet("https://games.roblox.com/v1/games/" .. game.PlaceId .. "/servers/Public?sortOrder=Asc&limit=100")
         )
@@ -185,14 +209,12 @@ UserInputService.InputBegan:Connect(function(input, gp)
         for _, server in ipairs(servers.data) do
             if server.playing < server.maxPlayers then
 
-                -- queue your script for next server
                 queue_on_teleport([[
 
 loadstring(game:HttpGet("https://raw.githubusercontent.com/IlIlIlIlIlIlIlIlIlIlIIIlllIIIII/test/refs/heads/main/test"))()
 
 ]])
 
-                -- teleport to new server
                 TeleportService:TeleportToPlaceInstance(game.PlaceId, server.id, LocalPlayer)
                 break
             end
