@@ -1,1 +1,153 @@
+--// SETTINGS
+local SCRIPT_URL = "https://raw.githubusercontent.com/IlIlIlIlIlIlIlIlIlIlIIIlllIIIII/test/refs/heads/main/test"
 
+--// MAIN FUNCTION
+local function StartSystem()
+    local Players = game:GetService("Players")
+    local UserInputService = game:GetService("UserInputService")
+    local RunService = game:GetService("RunService")
+    local ReplicatedStorage = game:GetService("ReplicatedStorage")
+
+    local LocalPlayer = Players.LocalPlayer
+    local Character = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
+    local Humanoid = Character:WaitForChild("Humanoid")
+    local gui = LocalPlayer:WaitForChild("PlayerGui")
+
+    -----------------------------------------------------
+    -- Animations
+    -----------------------------------------------------
+    local animGojo = Instance.new("Animation")
+    animGojo.AnimationId = ReplicatedStorage.Emote.GojoWalk.R15.Idle.AnimationId
+    local trackGojo = Humanoid:LoadAnimation(animGojo)
+    trackGojo.Priority = Enum.AnimationPriority.Action
+    trackGojo.Looped = true
+
+    local animGeto = Instance.new("Animation")
+    animGeto.AnimationId = ReplicatedStorage.Emote.GetoWalk.R15.Idle.AnimationId
+    local trackGeto = Humanoid:LoadAnimation(animGeto)
+    trackGeto.Priority = Enum.AnimationPriority.Action
+    trackGeto.Looped = true
+
+    local toggleGojo = false
+    local toggleGeto = false
+    local playingGojo = false
+    local playingGeto = false
+
+    -----------------------------------------------------
+    -- Keybinds (1 / 2)
+    -----------------------------------------------------
+    UserInputService.InputBegan:Connect(function(input, gp)
+        if gp then return end
+
+        if input.KeyCode == Enum.KeyCode.One then
+            toggleGojo = not toggleGojo
+            if not toggleGojo and playingGojo then
+                trackGojo:Stop()
+                playingGojo = false
+            end
+        end
+
+        if input.KeyCode == Enum.KeyCode.Two then
+            toggleGeto = not toggleGeto
+            if not toggleGeto and playingGeto then
+                trackGeto:Stop()
+                playingGeto = false
+            end
+        end
+    end)
+
+    -----------------------------------------------------
+    -- Movement Logic
+    -----------------------------------------------------
+    RunService.RenderStepped:Connect(function()
+        local moving = Humanoid.MoveDirection.Magnitude > 0.1
+
+        if toggleGojo and moving then
+            if not playingGojo then
+                playingGojo = true
+                trackGojo:Play()
+            end
+            if playingGeto then
+                trackGeto:Stop()
+                playingGeto = false
+            end
+
+        elseif toggleGeto and moving then
+            if not playingGeto then
+                playingGeto = true
+                trackGeto:Play()
+            end
+            if playingGojo then
+                trackGojo:Stop()
+                playingGojo = false
+            end
+
+        else
+            if playingGojo then
+                trackGojo:Stop()
+                playingGojo = false
+            end
+            if playingGeto then
+                trackGeto:Stop()
+                playingGeto = false
+            end
+        end
+    end)
+
+    -----------------------------------------------------
+    -- HipHeight
+    -----------------------------------------------------
+    Humanoid.HipHeight = 2.95
+
+    -----------------------------------------------------
+    -- GUI SPAM LOOP
+    -----------------------------------------------------
+    task.spawn(function()
+        while true do
+            pcall(function()
+                gui.StatsScreenGui.StatsWrapper.Content.RightPanel.PageHost
+                    .StatsWrapper.StatsPage1.Row_Ethnicity.ValueArea_Ethnicity.Value_Ethnicity.Text = "Saiyan"
+
+                gui.StatsScreenGui.StatsWrapper.Content.RightPanel.PageHost
+                    .StatsWrapper.StatsPage1.Row_Height.HeightPartsContainer.HeightFeetLeft
+                    .SplitPartContainer_Height.ValueArea_Height.Value_Height.Text = "7.0"
+
+                gui.StatsScreenGui.StatsWrapper.Content.RightPanel.PageHost
+                    .StatsWrapper.StatsPage1.Row_Height.HeightPartsContainer.HeightCmRight
+                    .SplitPartContainer_Height.ValueArea_Height.Value_Height.Text = "213cm"
+
+                gui.StatsScreenGui.StatsWrapper.Content.RightPanel.Frame
+                    .HeaderActions.RerollHeader.RerollBalance.Text = "Rerolls: 11,984"
+            end)
+
+            task.wait()
+        end
+    end)
+end
+
+-----------------------------------------------------
+-- TELEPORT KEYS (ONLY Z)
+-----------------------------------------------------
+local Players = game:GetService("Players")
+local LocalPlayer = Players.LocalPlayer
+local UserInputService = game:GetService("UserInputService")
+local TeleportService = game:GetService("TeleportService")
+
+UserInputService.InputBegan:Connect(function(input, gp)
+    if gp then return end
+
+    -- Z = Rejoin same place
+    if input.KeyCode == Enum.KeyCode.Z then
+        TeleportService:Teleport(game.PlaceId, LocalPlayer)
+    end
+end)
+
+-----------------------------------------------------
+-- QUEUE ON TELEPORT (EXPLOIT VERSION)
+-----------------------------------------------------
+queue_on_teleport([[
+    loadstring(game:HttpGet("]] .. SCRIPT_URL .. [["))()
+]])
+
+-- RUN SYSTEM NOW
+StartSystem()
