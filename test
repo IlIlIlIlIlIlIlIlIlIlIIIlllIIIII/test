@@ -5,7 +5,6 @@ local LocalPlayer = Players.LocalPlayer
 local TeleportService = game:GetService("TeleportService")
 local UserInputService = game:GetService("UserInputService")
 local HttpService = game:GetService("HttpService")
-local RunService = game:GetService("RunService")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 ----------------------------------------------------------------
@@ -19,22 +18,17 @@ end
 
 local Character = waitChar()
 local Humanoid = Character:WaitForChild("Humanoid")
-
-----------------------------------------------------------------
--- REMOVE WALKING ANIMATION SYSTEM
--- (No Gojo / No Geto / No Keybinds / No RenderStepped)
-----------------------------------------------------------------
-
 Humanoid.HipHeight = 2.75
 
 ----------------------------------------------------------------
--- CACHE GUI REFERENCES (FAST)
+-- RESCAN GUI EVERY TIME (NEVER BREAKS)
 ----------------------------------------------------------------
-local gui = LocalPlayer:WaitForChild("PlayerGui", 5)
-local statsGui = gui:WaitForChild("StatsScreenGui", 5)
-
 local function getStats()
-    if not statsGui.Enabled then return nil end
+    local gui = LocalPlayer:FindFirstChild("PlayerGui")
+    if not gui then return nil end
+
+    local statsGui = gui:FindFirstChild("StatsScreenGui")
+    if not statsGui or not statsGui.Enabled then return nil end
 
     local wrapper = statsGui:FindFirstChild("StatsWrapper")
     if not wrapper then return nil end
@@ -58,15 +52,24 @@ local function getStats()
 end
 
 ----------------------------------------------------------------
--- GUI UPDATE FUNCTION
+-- GUI UPDATE FUNCTION (ALL VALUES RESTORED)
 ----------------------------------------------------------------
 local function updateStats()
     local page1, right = getStats()
     if not page1 then return end
 
+    -- ETHNICITY
     page1.Row_Ethnicity.ValueArea_Ethnicity.Value_Ethnicity.Text = "Saiyan"
-    page1.Row_Height.HeightPartsContainer.HeightFeetLeft.SplitPartContainer_Height.ValueArea_Height.Value_Height.Text = "7.0"
-    page1.Row_Height.HeightPartsContainer.HeightCmRight.SplitPartContainer_Height.ValueArea_Height.Value_Height.Text = "213cm"
+
+    -- HEIGHT (FEET)
+    page1.Row_Height.HeightPartsContainer.HeightFeetLeft
+        .SplitPartContainer_Height.ValueArea_Height.Value_Height.Text = "7.0"
+
+    -- HEIGHT (CM)
+    page1.Row_Height.HeightPartsContainer.HeightCmRight
+        .SplitPartContainer_Height.ValueArea_Height.Value_Height.Text = "213cm"
+
+    -- REROLLS
     right.Frame.HeaderActions.RerollHeader.RerollBalance.Text = "Rerolls: 11,984"
 end
 
