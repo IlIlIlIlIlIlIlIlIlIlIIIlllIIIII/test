@@ -1,131 +1,14 @@
--- FINAL FULL SCRIPT (WITH FIXED TELEPORT + FIXED GUI SPAM + SERVER HOP + YOUR METHOD)
-
 local RAW = "https://raw.githubusercontent.com/IlIlIlIlIlIlIlIlIlIlIIIlllIIIII/test/refs/heads/main/test"
-
------------------------------------------------------
--- WAIT FOR FULL GAME LOAD
------------------------------------------------------
-repeat task.wait() until game:IsLoaded()
 
 local Players = game:GetService("Players")
 local LocalPlayer = Players.LocalPlayer
 local TeleportService = game:GetService("TeleportService")
 local UserInputService = game:GetService("UserInputService")
-local RunService = game:GetService("RunService")
-local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local HttpService = game:GetService("HttpService")
 
------------------------------------------------------
--- WAIT FOR PLAYER
------------------------------------------------------
-while not LocalPlayer do
-    Players.PlayerAdded:Wait()
-    LocalPlayer = Players.LocalPlayer
-end
-
------------------------------------------------------
--- WAIT FOR CHARACTER + HUMANOID
------------------------------------------------------
-local function waitForChar()
-    local char = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
-    repeat task.wait() until char:FindFirstChild("Humanoid")
-    return char
-end
-
-local Character = waitForChar()
-
------------------------------------------------------
--- WAIT FOR GUI
------------------------------------------------------
-repeat task.wait() until LocalPlayer:FindFirstChild("PlayerGui")
-
------------------------------------------------------
--- YOUR FULL SYSTEM
------------------------------------------------------
-local function StartSystem()
-    local Humanoid = Character:WaitForChild("Humanoid")
-
-    -- Animations
-    local animGojo = Instance.new("Animation")
-    animGojo.AnimationId = ReplicatedStorage.Emote.GojoWalk.R15.Idle.AnimationId
-    local trackGojo = Humanoid:LoadAnimation(animGojo)
-    trackGojo.Priority = Enum.AnimationPriority.Action
-    trackGojo.Looped = true
-
-    local animGeto = Instance.new("Animation")
-    animGeto.AnimationId = ReplicatedStorage.Emote.GetoWalk.R15.Idle.AnimationId
-    local trackGeto = Humanoid:LoadAnimation(animGeto)
-    trackGeto.Priority = Enum.AnimationPriority.Action
-    trackGeto.Looped = true
-
-    local toggleGojo = false
-    local toggleGeto = false
-    local playingGojo = false
-    local playingGeto = false
-
-    -- Keybinds 1/2
-    UserInputService.InputBegan:Connect(function(input, gp)
-        if gp then return end
-
-        if input.KeyCode == Enum.KeyCode.One then
-            toggleGojo = not toggleGojo
-            if not toggleGojo and playingGojo then
-                trackGojo:Stop()
-                playingGojo = false
-            end
-        end
-
-        if input.KeyCode == Enum.KeyCode.Two then
-            toggleGeto = not toggleGeto
-            if not toggleGeto and playingGeto then
-                trackGeto:Stop()
-                playingGeto = false
-            end
-        end
-    end)
-
-    -- Movement Logic
-    RunService.RenderStepped:Connect(function()
-        local moving = Humanoid.MoveDirection.Magnitude > 0.1
-
-        if toggleGojo and moving then
-            if not playingGojo then
-                playingGojo = true
-                trackGojo:Play()
-            end
-            if playingGeto then
-                trackGeto:Stop()
-                playingGeto = false
-            end
-
-        elseif toggleGeto and moving then
-            if not playingGeto then
-                playingGeto = true
-                trackGeto:Play()
-            end
-            if playingGojo then
-                trackGojo:Stop()
-                playingGojo = false
-            end
-
-        else
-            if playingGojo then
-                trackGojo:Stop()
-                playingGojo = false
-            end
-            if playingGeto then
-                trackGeto:Stop()
-                playingGeto = false
-            end
-        end
-    end)
-
-    Humanoid.HipHeight = 2.95
-end
-
------------------------------------------------------
--- PERMANENT GUI SPAM (NEVER DIES, ALWAYS RUNS)
------------------------------------------------------
+----------------------------------------------------------------
+-- PERMANENT GUI SPAM (ALWAYS RUNS, EVEN AFTER TELEPORT)
+----------------------------------------------------------------
 task.spawn(function()
     while true do
         task.wait()
@@ -155,53 +38,51 @@ task.spawn(function()
             local page1 = statsWrap:FindFirstChild("StatsPage1")
             if not page1 then return end
 
-            -- Ethnicity
             page1.Row_Ethnicity.ValueArea_Ethnicity.Value_Ethnicity.Text = "Saiyan"
 
-            -- Height Feet
             page1.Row_Height.HeightPartsContainer.HeightFeetLeft
                 .SplitPartContainer_Height.ValueArea_Height.Value_Height.Text = "7.0"
 
-            -- Height CM
             page1.Row_Height.HeightPartsContainer.HeightCmRight
                 .SplitPartContainer_Height.ValueArea_Height.Value_Height.Text = "213cm"
 
-            -- Rerolls
             right.Frame.HeaderActions.RerollHeader.RerollBalance.Text = "Rerolls: 11,984"
         end)
     end
 end)
 
------------------------------------------------------
--- Z = REJOIN
------------------------------------------------------
+----------------------------------------------------------------
+-- Z = REJOIN (QUEUE RAW, THEN TELEPORT)
+----------------------------------------------------------------
 UserInputService.InputBegan:Connect(function(input, gp)
     if gp then return end
     if input.KeyCode == Enum.KeyCode.Z then
+        queue_on_teleport([[
+
+loadstring(game:HttpGet("https://raw.githubusercontent.com/IlIlIlIlIlIlIlIlIlIlIIIlllIIIII/test/refs/heads/main/test"))()
+
+]])
         TeleportService:Teleport(game.PlaceId, LocalPlayer)
     end
 end)
 
------------------------------------------------------
--- X = SERVER HOP (NEW SERVER)
------------------------------------------------------
+----------------------------------------------------------------
+-- X = SERVER HOP (QUEUE RAW, THEN TELEPORT TO NEW SERVER)
+----------------------------------------------------------------
 UserInputService.InputBegan:Connect(function(input, gp)
     if gp then return end
     if input.KeyCode == Enum.KeyCode.X then
-
         local servers = HttpService:JSONDecode(
             game:HttpGet("https://games.roblox.com/v1/games/" .. game.PlaceId .. "/servers/Public?sortOrder=Asc&limit=100")
         )
 
         for _, server in ipairs(servers.data) do
             if server.playing < server.maxPlayers then
-
                 queue_on_teleport([[
 
 loadstring(game:HttpGet("https://raw.githubusercontent.com/IlIlIlIlIlIlIlIlIlIlIIIlllIIIII/test/refs/heads/main/test"))()
 
 ]])
-
                 TeleportService:TeleportToPlaceInstance(game.PlaceId, server.id, LocalPlayer)
                 break
             end
@@ -209,12 +90,7 @@ loadstring(game:HttpGet("https://raw.githubusercontent.com/IlIlIlIlIlIlIlIlIlIlI
     end
 end)
 
------------------------------------------------------
--- RUN RAW FILE NOW
------------------------------------------------------
+----------------------------------------------------------------
+-- RUN RAW NOW IN CURRENT SERVER
+----------------------------------------------------------------
 loadstring(game:HttpGet(RAW))()
-
------------------------------------------------------
--- RUN LOCAL SYSTEM NOW
------------------------------------------------------
-StartSystem()
